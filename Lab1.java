@@ -61,7 +61,7 @@ public class Lab1 {
      
 
      public static void main(String[] args) {
-          //q1q2();
-          q3();
+          q1q2(); // Parts 1 and 2
+          q3(); // Part 3
      }
 }
