@@ -41,6 +41,7 @@ public class Lab2 {
                     System.out.println("Correct; Score:  "+numberRight+"; Time Elapsed: " + (endTime-startTime )/1000000000 +"\n");
                } else {
                     System.out.println("Incorrect; Score:  "+numberRight+"; Time Elapsed: " + (endTime-startTime )/1000000000 + "\n");
+                    break;
                }
                //update time
                endTime = System.nanoTime();
