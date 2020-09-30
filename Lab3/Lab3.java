@@ -57,9 +57,9 @@ public class Lab3 {
           for (int i=0; i<fastaList.size(); i++){
                String seq = "";
                if (fastaList.get(i).startsWith(">")){
-                    // append header
+                    // append seqID
                     seq = seq.concat(fastaList.get(i).substring(1).concat("\t"));
-                    // check the next line for new seq id
+                    // check the next line for new seq id, if not append sequence
                     while (i<fastaList.size()-1 && !fastaList.get(i+1).startsWith(">")){
                          seq = seq.concat(fastaList.get(i+1));
                          i++;
@@ -73,6 +73,7 @@ public class Lab3 {
                     String countT = countChar(seq.split("\t")[1], 'T');
                     String [] outArray = {seqID, countA, countC, countG, countT, sequence};
 
+                    // concat all for tab delimd string
                     String concatString = "";
                     for (int j=0; j<6; j++){
                          concatString = concatString.concat(outArray[j]).concat("\t");
@@ -85,10 +86,12 @@ public class Lab3 {
      
 
      public static void main(String[] args) {
+          // process cmd line args
           for(int i = 0; i< args.length; i++) {
                argList.add(args[i]);
           }
 
+          // Create file
           try {
                File myObj = new File("fastaOut.txt");
                if (myObj.createNewFile()) {
@@ -101,6 +104,7 @@ public class Lab3 {
                e.printStackTrace();
              }
 
+          // write to file
           try {
                FileWriter myWriter = new FileWriter("fastaOut.txt");
                for (int j=0; j<Lab3.parseFasta().size(); j++){
