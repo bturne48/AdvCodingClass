@@ -26,7 +26,9 @@ public class Lab3 {
      }
      
 
+     // method to read in input and output an array of tab delimited lines
      public static ArrayList<String> parseFasta(){
+          // store in and out files
           List<String> fastaList = new ArrayList<String>();
           List<String> outList = new ArrayList<String>();
 
@@ -50,7 +52,6 @@ public class Lab3 {
           } catch (FileNotFoundException e) {
                System.out.println("An error occurred.");
                e.printStackTrace();
-
           }
           
           // iterate over list and look for >
