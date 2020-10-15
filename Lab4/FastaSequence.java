@@ -163,11 +163,11 @@ public class FastaSequence {
           List<FastaSequence> fastaList = FastaSequence.readFastaFile(argList.get(0));
 
           // // part 1
-          // for( FastaSequence fs : fastaList) {
-          // System.out.println(fs.getHeader());
-          // System.out.println(fs.getSequence());
-          // System.out.println(fs.getGCRatio());
-          // }
+          for( FastaSequence fs : fastaList) {
+          System.out.println(fs.getHeader());
+          System.out.println(fs.getSequence());
+          System.out.println(fs.getGCRatio());
+          }
 
           // for part 2; i acknowledge this is ridiculous but i couldnt understand how to interact with the FastaSequence class
           for( FastaSequence fs : fastaList) {
