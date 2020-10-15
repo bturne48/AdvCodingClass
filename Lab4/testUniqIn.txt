@@ -1,0 +1,13 @@
+>Seq1 
+AA
+>Seq2
+AA
+>Seq3
+AC
+>Seq4
+AC
+>Seq5
+AC
+>Seq6
+AG
+

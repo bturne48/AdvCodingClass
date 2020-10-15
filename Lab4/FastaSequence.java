@@ -1,8 +1,14 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 public class FastaSequence {
@@ -53,15 +59,15 @@ public class FastaSequence {
           List<FastaSequence> outList = new ArrayList<>();
           List<String> fastaList = new ArrayList<String>();
 
-          //Read in file
+          // Read in file
           try {
                File myObj = new File(filepath);
-               Scanner myReader = new Scanner(myObj);  // Create a Scanner object
+               Scanner myReader = new Scanner(myObj); // Create a Scanner object
                while (myReader.hasNextLine()) {
                     String data = myReader.nextLine();
                     fastaList.add(data);
-          }
-          myReader.close();
+               }
+               myReader.close();
           } catch (FileNotFoundException e) {
                System.out.println("An error occurred.");
                e.printStackTrace();
@@ -90,8 +96,9 @@ public class FastaSequence {
      // print lines with unique sequences
      public static void writeUnique(File inFile, File outFile ) throws Exception {
           List<String> fastaList = new ArrayList<String>();
-          HashMap<Character, Integer> numberMap = new HashMap<Character, Integer>();
-          
+          HashMap<String, Integer> numberMap = new HashMap<String, Integer>();
+          FileWriter myWriter = new FileWriter(outFile);
+
           //Read in file
           try {
                Scanner myReader = new Scanner(inFile);  // Create a Scanner object
@@ -116,20 +123,34 @@ public class FastaSequence {
                          i++;
                     }
                }
-               for (int j=0; j<seq.length(); j++){
-                    Integer count = numberMap.get(seq.charAt(j));
 
-                    if ( count == null ){
-                         count = 0;
-                    }
-
-                    count++;
-
-                    numberMap.put(seq.charAt(j), count);
+               // look for unique srings 
+               if ( numberMap.containsKey(seq) ){
+                    numberMap.put(seq, numberMap.get(seq)+1);
+               } else {
+                    numberMap.put(seq, 1);
                }
-               System.out.print(numberMap);
           }
+          // Create a list from elements of HashMap 
+          List<Map.Entry<String, Integer> > list = new LinkedList<Map.Entry<String, Integer> >(numberMap.entrySet()); 
+          // Sort the list 
+          Collections.sort(list, new Comparator<Map.Entry<String, Integer> >() { 
+          public int compare(Map.Entry<String, Integer> o1,  Map.Entry<String, Integer> o2) { 
+               return (o1.getValue()).compareTo(o2.getValue()); 
+          } 
+          }); 
+   
+          // put data from sorted list to hashmap  
+          HashMap<String, Integer> temp = new LinkedHashMap<String, Integer>(); 
+          for (Map.Entry<String, Integer> aa : list) { 
+               temp.put(aa.getKey(), aa.getValue()); 
+          }    
           
+          // write data from sorted hash into file
+          for (String key: temp.keySet()) {
+              myWriter.write(">"+key+"\n"+temp.get(key)+"\n");
+          }
+          myWriter.close();
      }
 
 
@@ -139,13 +160,21 @@ public class FastaSequence {
                argList.add(args[i]);
           }
           
-          List<FastaSequence> fastaList = 
-          FastaSequence.readFastaFile(argList.get(0));
+          List<FastaSequence> fastaList = FastaSequence.readFastaFile(argList.get(0));
 
+          // // part 1
+          // for( FastaSequence fs : fastaList) {
+          // System.out.println(fs.getHeader());
+          // System.out.println(fs.getSequence());
+          // System.out.println(fs.getGCRatio());
+          // }
+
+          // for part 2; i acknowledge this is ridiculous but i couldnt understand how to interact with the FastaSequence class
           for( FastaSequence fs : fastaList) {
-          System.out.println(fs.getHeader());
-          System.out.println(fs.getSequence());
-          System.out.println(fs.getGCRatio());
+               File myIn = new File(argList.get(1));
+               File myOut = new File(argList.get(2));
+               fs.writeUnique(myIn, myOut);
+               break;
           }
      }
 
