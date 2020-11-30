@@ -45,7 +45,7 @@ public class Lab6 extends JFrame {
 
           public void startTimer() {
                // // timer code
-               final int totalSeconds = 10;
+               final int totalSeconds = 30;
 
                final Timer tm = new Timer(1000, e -> {
                     System.out.println("Seconds remaining: " + (totalSeconds * 1000 - System.currentTimeMillis() + START) / 1000d);
