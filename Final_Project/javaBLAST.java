@@ -1,16 +1,9 @@
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.lang.ProcessBuilder;
-import java.lang.ProcessBuilder.Redirect;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
+
+
+import java.io.*;
+import java.util.*;
+import java.util.concurrent.*;
+import java.lang.ProcessBuilder.*;
 
 
 public class javaBLAST {
@@ -23,83 +16,6 @@ public class javaBLAST {
 
     // what directory was this program run in
     public static String workingDirec = System.getProperty("user.dir")+"/";
-
-
-    public static class ReaderThread implements Runnable{
-
-        protected BlockingQueue<String> blockingQueue = null;
-        private String inFileName;
-    
-        public ReaderThread(BlockingQueue<String> blockingQueue, String inFileName){
-            this.inFileName = inFileName;
-            this.blockingQueue = blockingQueue;     
-        }
-    
-        @Override
-        public void run() {
-        BufferedReader br = null;
-        try {
-                br = new BufferedReader(new FileReader(new File(inFileName)));
-                String buffer =null;
-                while((buffer=br.readLine())!=null){
-                    blockingQueue.put(buffer);
-                }
-                blockingQueue.put("EOF");  //When end of file has been reached
-    
-            } catch (FileNotFoundException e) {
-    
-                e.printStackTrace();
-            } catch (IOException e) {
-    
-                e.printStackTrace();
-            } catch(InterruptedException e){
-    
-            }finally{
-                try {
-                    br.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    public static class WriterThread implements Runnable{
-
-        protected BlockingQueue<String> blockingQueue = null;
-      
-        public WriterThread(BlockingQueue<String> blockingQueue){
-          this.blockingQueue = blockingQueue;     
-        }
-      
-        @Override
-        public void run() {
-             PrintWriter writer = null;
-      
-          try {
-              writer = new PrintWriter(new File("outputFile.txt"));
-      
-              while(true){
-                  String buffer = blockingQueue.take();
-                  //Check whether end of file has been reached
-                  if(buffer.equals("EOF")){ 
-                      break;
-                  }
-                  writer.println(buffer);
-              }               
-      
-      
-          } catch (FileNotFoundException e) {
-      
-              e.printStackTrace();
-          } catch(InterruptedException e){
-      
-          }finally{
-              writer.close();
-          } 
-      
-        }
-   }
 
     public void runBlast(String blastType, String db, List<String> query, String blastfmt) throws IOException {
           
@@ -129,10 +45,27 @@ public class javaBLAST {
         return;
     }
 
+    // public class parseBLAST implements Runnable {
+
+    //     private final int threadID; 
+
+    //     public parseBLAST(int threadID) {
+
+    //         this.threadID = threadID;
+    //     }
+
+    //     public void run() {
+            
+
+
+    //     }
+
+    // }
     
 
-    public static void main(String[] args) throws Exception {
 
+    public static void main(String[] args) throws Exception {
+        
         javaBLAST jb = new javaBLAST();
 
         //which part of the file to run
@@ -172,14 +105,80 @@ public class javaBLAST {
             }
         }
             
-        // PART 2: read in file multi threaded and parse ther results
-        for (Integer i=0; i<fileNames.size(); i++) {
-            System.out.println(fileNames.get(i));
-            ReaderThread reader = new ReaderThread(queue, "./BLAST_Results/ST_1_16.blast");
-            WriterThread writer = new WriterThread(queue);
-            new Thread(reader).start();
-            new Thread(writer).start();
+        
+        // PART 2: read in files parse ther results
+
+
+        // read in blast results and illumina breakpoint
+        System.out.println("UPDATE: START Reading in Blast Results");
+        HashMap<String, ArrayList<String>> blastHash = TextFiles.readBlastResults( new File("/Users/bturne48/Documents/GitHub/AdvCodingClass/Final_Project/BLAST_Results/ST_1_16.blast"));
+        System.out.println("UPDATE: DONE Reading in Blast Results\nUPDATE: START Read in Illumina Results");
+        ArrayList<String> illumBPs = TextFiles.readIlluminaBPs(new File("/Users/bturne48/Documents/GitHub/AdvCodingClass/Final_Project/Input/clusteredVariants.txt"));
+        System.out.println("UPDATE: DONE Read in Illumina Results");
+        ArrayList<String> confirmedReads = new ArrayList<String>();
+
+        //loop over the hash map and see if the coords match any of the illum bps
+        for (String ill: illumBPs) {  
+            
+            // variables for comparison from illumina stuff
+            String[] illSplit = ill.split("\t");
+            String illChrom1 = illSplit[0];
+            Integer illStartPos1 = Integer.parseInt(illSplit[1]);
+            Integer illEndPos1 = Integer.parseInt(illSplit[2]);
+            String illChrom2 = illSplit[3];
+            Integer illStartPos2 = Integer.parseInt(illSplit[4]);
+            Integer illEndPos2 = Integer.parseInt(illSplit[5]);
+
+            // confirm that one pacbio read confirms both sides of an illumina mutation
+            ArrayList<String> confirmedBPs = new ArrayList<String>();
+        
+            for (Map.Entry<String, ArrayList<String>> entry : blastHash.entrySet()) {
+
+                // if both bps verified, illumina mutation is confirmed, go to the next one
+                if ( confirmedBPs.size() == 2 ) {
+                    confirmedReads.add(ill);
+                    System.out.println(ill);
+                    break;
+                } 
+
+                // looping over pac bio blast coords and mapping them to see if they fall in bounds of illumina mutations
+                for (String pac: entry.getValue()) {
+                    
+                    // if both bps verified, read is confirmed, go to the next one
+                    if ( confirmedBPs.size() == 2 ) {
+                        confirmedReads.add(ill);
+                        break;
+                    } 
+                    
+                    // variables for comparison from the pacbio reads
+                    String[] pacSplit = pac.split("\t");
+                    String pacChrom = pacSplit[0];
+                    Integer pacStartPos = Integer.parseInt(pacSplit[1]);
+                    Integer pacEndPos = Integer.parseInt(pacSplit[2]);
+
+                    // comparison, if the pacbio read falls within the bounds of the illumina breakpoints
+                    if ( illChrom1.equals(pacChrom) && Math.min(pacStartPos, pacEndPos) > illStartPos1 && Math.max(pacStartPos, pacEndPos) < illEndPos1 ) {
+                        
+                        // if this breakpoint has found a match with a pacbio blast result already move on
+                        if ( confirmedBPs.contains(illChrom1+"\t"+illStartPos1+"\t"+illEndPos1) ) {
+                            break;
+                        } else {
+                            System.out.println(illChrom1+"\t"+illStartPos1+"\t"+illEndPos1);
+                            confirmedBPs.add(illChrom1+"\t"+illStartPos1+"\t"+illEndPos1);
+                        }
+
+                    } else if ( illChrom2.equals(pacChrom) && Math.min(pacStartPos, pacEndPos) > illStartPos2 && Math.max(pacStartPos, pacEndPos) < illEndPos2 ) {
+                        
+                        // if this breakpoint has found a match with a pacbio blast result
+                        if ( confirmedBPs.contains(illChrom2+"\t"+illStartPos2+"\t"+illEndPos2) ) {
+                            break;
+                        } else {
+                            confirmedBPs.add(illChrom2+"\t"+illStartPos2+"\t"+illEndPos2);
+                            System.out.println(illChrom2+"\t"+illStartPos2+"\t"+illEndPos2);
+                        }
+                    }
+                }
+            }
         }
     }
 }
-
