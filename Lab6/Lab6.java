@@ -190,8 +190,6 @@ public class Lab6 extends JFrame {
      public static void main(String[] args) throws InterruptedException {
           new Lab6();
      }
-
-     
 }
 
 
