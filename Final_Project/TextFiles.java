@@ -68,11 +68,11 @@ public class TextFiles {
      }
 
      public static void main(String[] args) {
-          // ArrayList<LinkedList<String>> test = readIlluminaBPs(new File("/Users/bturne48/Documents/GitHub/AdvCodingClass/Final_Project/Input/clusteredVariants.txt"));
+          // ArrayList<LinkedList<String>> test = readIlluminaBPs(new File("/Users/brando/Documents/GitHub/AdvCodingClass/Final_Project/Input/clusteredVariants.txt"));
           // for (LinkedList<String> s: test) System.out.println(s);
           
           // System.out.println(System.currentTimeMillis());
-          // HashMap<String, ArrayList<String>> test = TextFiles.readBlastResults(new File("/Users/bturne48/Documents/GitHub/AdvCodingClass/Final_Project/BLAST_Results/ST_1_16.blast"));
+          // HashMap<String, ArrayList<String>> test = TextFiles.readBlastResults(new File("/Users/brando/Documents/GitHub/AdvCodingClass/Final_Project/BLAST_Results/ST_1_16.blast"));
           // //System.out.println(Arrays.asList(test));
           // System.out.println(System.currentTimeMillis());
      }
