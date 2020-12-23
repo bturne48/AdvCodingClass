@@ -11,11 +11,11 @@ Part 1:
         3) Creates the results for part 1 that are used in part 2 and stores them in a directory called BLAST_Results
         
 Part 2:
-        RUN WITH: javaBlast.java 2
+        RUN WITH: "javaBlast.java 2"
         1) Parses the output from part1 into a hash map, and reads in illumina breakpoints so you can check which breakpoints are validated with BLAST
         2) Outputs a list of variants to the std out, can be piped to a file which is how part 2 results were created
 
 Part 3: 
-        RUN WITH: javaBlast.java 3
+        RUN WITH: "javaBlast.java 3"
         1) Using the list of confirmed variants calculate the allele freq for all confirmed vars. This could be fed to R to make a density plot
         2) Used to make part 3 results
